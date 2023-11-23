@@ -1,4 +1,4 @@
-package com.hangout.core.hangoutreviewservice;
+package com.com.hangout.core.hangoutpostsservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
