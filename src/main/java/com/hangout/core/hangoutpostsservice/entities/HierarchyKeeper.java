@@ -1,5 +1,6 @@
 package com.hangout.core.hangoutpostsservice.entities;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -13,11 +14,12 @@ import lombok.Data;
 public class HierarchyKeeper {
     @Id
     @GeneratedValue
+    @Column(name = "keeperid")
     private Integer keeperId;
     @ManyToOne
-    @JoinColumn(name = "parent_comment_id")
+    @JoinColumn(name = "parentcommentid")
     Comment parentComment;
     @ManyToOne
-    @JoinColumn(name = "child_comment_id")
+    @JoinColumn(name = "childcommentid")
     Comment childCommnet;
 }

@@ -1,5 +1,6 @@
 package com.hangout.core.hangoutpostsservice.entities;
 
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -14,6 +15,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import lombok.Data;
 
 @Entity
@@ -21,10 +23,13 @@ import lombok.Data;
 public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "postid")
     private UUID postId;
+    @Column(name = "pvid")
     private UUID pvId;
+    @Column(name = "postmedias")
     private List<String> postMedias;
-    @Column(length = 500)
+    @Column(name = "postdescription", length = 500)
     private String postDescription;
     @JsonProperty(access = Access.READ_ONLY)
     private Integer hearts;
@@ -33,5 +38,6 @@ public class Post {
     @JsonProperty(access = Access.READ_ONLY)
     private Integer interactions;
     @JsonProperty(access = Access.READ_ONLY)
-    private final ZonedDateTime createdAt = ZonedDateTime.ofInstant(Instant.now(), ZoneId.of("Asia/Kolkata"));
+    @Column(name = "createdat")
+    private final Timestamp createdAt = Timestamp.from(Instant.now());
 }

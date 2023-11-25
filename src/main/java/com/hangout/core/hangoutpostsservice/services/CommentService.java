@@ -1,12 +1,17 @@
 package com.hangout.core.hangoutpostsservice.services;
 
+import java.sql.Timestamp;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.hangout.core.dto.CommentDTO;
-import com.hangout.core.dto.Reply;
+import com.hangout.core.hangoutpostsservice.dto.CommentDTO;
+import com.hangout.core.hangoutpostsservice.dto.FetchCommentProjection;
+import com.hangout.core.hangoutpostsservice.dto.NewCommentRequest;
+import com.hangout.core.hangoutpostsservice.dto.Reply;
 import com.hangout.core.hangoutpostsservice.entities.Comment;
 import com.hangout.core.hangoutpostsservice.entities.HierarchyKeeper;
 import com.hangout.core.hangoutpostsservice.entities.Post;
@@ -28,7 +33,7 @@ public class CommentService {
     }
 
     @Transactional
-    public String createTopLevelComment(CommentDTO comment) {
+    public String createTopLevelComment(NewCommentRequest comment) {
         Post post = postService.getParticularPost(comment.postId());
         if (post != null) {
             Comment topLevelComment = new Comment();
@@ -65,5 +70,15 @@ public class CommentService {
         } else {
             return null;
         }
+    }
+
+    public List<CommentDTO> fetchTopLevelCommentsForAPost(String postId) {
+        UUID postIdAsUUID = UUID.fromString(postId);
+        List<FetchCommentProjection> model = commentRepo.fetchTopLevelComments(postIdAsUUID);
+        return model.stream()
+                .map(comment -> new CommentDTO(comment.getCommentid(),
+                        Timestamp.from(comment.getCreatedat()),
+                        comment.getText(), comment.getUserid()))
+                .toList();
     }
 }

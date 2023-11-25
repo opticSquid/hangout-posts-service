@@ -4,7 +4,7 @@ spring:
   application:
     name: content
   profiles:
-    active: home
+    active: office
   datasource:
     driver-class-name: org.postgresql.Driver
   jpa:

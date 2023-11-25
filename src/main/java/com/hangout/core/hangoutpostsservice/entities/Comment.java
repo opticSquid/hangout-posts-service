@@ -1,5 +1,6 @@
 package com.hangout.core.hangoutpostsservice.entities;
 
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -22,15 +23,19 @@ import lombok.Data;
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "commentid")
     private UUID commentId;
     @ManyToOne
-    @JoinColumn(name = "post_id", referencedColumnName = "postId")
+    @JoinColumn(name = "postid", referencedColumnName = "postId")
     private Post post;
     @JsonProperty(access = Access.READ_ONLY)
+    @Column(name = "userid")
     private UUID userId;
     @Column(length = 500)
     private String text;
+    @Column(name = "toplevel")
     private Boolean topLevel;
     @JsonProperty(access = Access.READ_ONLY)
-    private final ZonedDateTime createdAt = ZonedDateTime.ofInstant(Instant.now(), ZoneId.of("Asia/Kolkata"));
+    @Column(name = "createdat")
+    private final Timestamp createdAt = Timestamp.from(Instant.now());
 }
