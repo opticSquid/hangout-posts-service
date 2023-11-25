@@ -30,7 +30,12 @@ public class PostService {
 
     public Post getParticularPost(String postId) {
         Optional<Post> maybepost = postRepo.findById(UUID.fromString(postId));
-        return maybepost.orElse(null);
+        if (maybepost.isPresent()) {
+            postRepo.increaseInteractionCount(UUID.fromString(postId));
+            return maybepost.get();
+        } else {
+            return null;
+        }
     }
 
     public void increaseCommentCount(UUID postId) {
