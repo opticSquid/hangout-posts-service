@@ -17,9 +17,6 @@ public class PostService {
     private final PostRepo postRepo;
 
     public String create(Post post) {
-        post.setComments(0);
-        post.setHearts(0);
-        post.setInteractions(0);
         Post savedPost = postRepo.save(post);
         return savedPost.getPostId().toString();
     }

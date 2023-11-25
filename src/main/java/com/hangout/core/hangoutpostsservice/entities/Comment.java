@@ -38,4 +38,6 @@ public class Comment {
     @JsonProperty(access = Access.READ_ONLY)
     @Column(name = "createdat")
     private final Timestamp createdAt = Timestamp.from(Instant.now());
+    @JsonProperty(access = Access.READ_ONLY)
+    private final Integer replies = 0;
 }

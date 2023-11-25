@@ -41,10 +41,6 @@ public class CommentService {
             topLevelComment.setText(comment.comment());
             postService.increaseCommentCount(post.getPostId());
             topLevelComment = saveComment(topLevelComment);
-            HierarchyKeeper hierarchy = new HierarchyKeeper();
-            hierarchy.setParentComment(topLevelComment);
-            hierarchy.setChildCommnet(topLevelComment);
-            hkRepo.save(hierarchy);
             return topLevelComment.getCommentId().toString();
         } else {
             return null;
@@ -76,6 +72,16 @@ public class CommentService {
     public List<CommentDTO> fetchTopLevelCommentsForAPost(String postId) {
         UUID postIdAsUUID = UUID.fromString(postId);
         List<FetchCommentProjection> model = commentRepo.fetchTopLevelComments(postIdAsUUID);
+        return model.stream()
+                .map(comment -> new CommentDTO(comment.getCommentid(),
+                        Timestamp.from(comment.getCreatedat()),
+                        comment.getText(), comment.getUserid()))
+                .toList();
+    }
+
+    public List<CommentDTO> fetchAllChildCommentsForAComment(String parentCommentId) {
+        UUID parentCommentIdUUID = UUID.fromString(parentCommentId);
+        List<FetchCommentProjection> model = hkRepo.findAllChildComments(parentCommentIdUUID);
         return model.stream()
                 .map(comment -> new CommentDTO(comment.getCommentid(),
                         Timestamp.from(comment.getCreatedat()),

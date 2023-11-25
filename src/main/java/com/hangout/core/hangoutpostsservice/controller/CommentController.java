@@ -36,4 +36,9 @@ public class CommentController {
     public List<CommentDTO> getAllTopLevelComments(@PathVariable String postId) {
         return commentService.fetchTopLevelCommentsForAPost(postId);
     }
+
+    @GetMapping("/replies/{parentCommentId}")
+    public List<CommentDTO> getAllChildCommentsOfAParentComment(@PathVariable String parentCommentId) {
+        return commentService.fetchAllChildCommentsForAComment(parentCommentId);
+    }
 }
