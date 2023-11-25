@@ -1,7 +1,6 @@
 package com.hangout.core.hangoutpostsservice.services;
 
 import java.sql.Timestamp;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -40,6 +39,7 @@ public class CommentService {
             topLevelComment.setTopLevel(true);
             topLevelComment.setPost(post);
             topLevelComment.setText(comment.comment());
+            postService.increaseCommentCount(post.getPostId());
             topLevelComment = saveComment(topLevelComment);
             HierarchyKeeper hierarchy = new HierarchyKeeper();
             hierarchy.setParentComment(topLevelComment);
@@ -61,6 +61,7 @@ public class CommentService {
             childComment.setText(reply.comment());
             Post post = postService.getParticularPost(parentComment.getPost().getPostId().toString());
             childComment.setPost(post);
+            postService.increaseCommentCount(post.getPostId());
             childComment = saveComment(childComment);
             HierarchyKeeper hierarchy = new HierarchyKeeper();
             hierarchy.setParentComment(parentComment);

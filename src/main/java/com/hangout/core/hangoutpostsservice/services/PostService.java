@@ -17,6 +17,9 @@ public class PostService {
     private final PostRepo postRepo;
 
     public String create(Post post) {
+        post.setComments(0);
+        post.setHearts(0);
+        post.setInteractions(0);
         Post savedPost = postRepo.save(post);
         return savedPost.getPostId().toString();
     }
@@ -28,5 +31,13 @@ public class PostService {
     public Post getParticularPost(String postId) {
         Optional<Post> maybepost = postRepo.findById(UUID.fromString(postId));
         return maybepost.orElse(null);
+    }
+
+    public void increaseCommentCount(UUID postId) {
+        postRepo.increaseCommentCount(postId);
+    }
+
+    public void increaseHeartCount(UUID postId) {
+        postRepo.increaseHeartCount(postId);
     }
 }
