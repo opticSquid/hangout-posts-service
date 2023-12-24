@@ -14,6 +14,9 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+  output:
+    ansi:
+      enabled: ALWAYS
 eureka:
   client:
     fetch-registry: true
