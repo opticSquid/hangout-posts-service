@@ -2,12 +2,9 @@ package com.hangout.core.hangoutpostsservice.controller;
 
 import java.util.List;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.hangout.core.hangoutpostsservice.dto.PostDTO;
+import io.micrometer.observation.annotation.Observed;
+import org.springframework.web.bind.annotation.*;
 
 import com.hangout.core.hangoutpostsservice.entities.Post;
 import com.hangout.core.hangoutpostsservice.services.PostService;
@@ -19,9 +16,9 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/posts/post")
 public class PostController {
     private final PostService postService;
-
+@Observed(name = "create-post", contextualName = "gateway ===> controller function")
     @PostMapping
-    public String createPost(@RequestBody Post post) {
+    public String createPost(@ModelAttribute PostDTO post) {
         return postService.create(post);
     }
 
