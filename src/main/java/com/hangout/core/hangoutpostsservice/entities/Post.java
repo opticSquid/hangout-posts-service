@@ -37,7 +37,6 @@ public class Post {
     @JsonProperty(access = Access.READ_ONLY)
     @Column(name = "createdat")
     private final Timestamp createdAt = Timestamp.from(Instant.now());
-
     public Post(String postMedia,String postDescription){
         this.postMedia = postMedia;
         this.postDescription=postDescription;

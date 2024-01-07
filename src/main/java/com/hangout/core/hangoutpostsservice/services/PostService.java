@@ -67,7 +67,6 @@ public class PostService {
             throw new FileUploadFailed("could not retrieve file size of the attached file");
         }
     }
-
     public List<Post> findAll() {
         return postRepo.findAll();
     }
