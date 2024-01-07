@@ -17,13 +17,13 @@ public class ObservationLogHandler implements ObservationHandler<Observation.Con
 
     @Override
     public void onStart(Observation.Context context) {
-        log.info("Before running the observation for context [{}], userType [{}]", context.getName(),
+        log.debug("Before running the observation for context [{}], userType [{}]", context.getName(),
                 getUserTypeFromContext(context));
     }
 
     @Override
     public void onStop(Observation.Context context) {
-        log.info("After running the observation for context [{}], userType [{}]", context.getName(),
+        log.debug("After running the observation for context [{}], userType [{}]", context.getName(),
                 getUserTypeFromContext(context));
     }
 

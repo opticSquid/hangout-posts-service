@@ -24,8 +24,8 @@ public class Post {
     private UUID postId;
     @Column(name = "pvid")
     private UUID pvId;
-    @Column(name = "postmedias")
-    private List<String> postMedias;
+    @Column(name = "postmedia")
+    private String postMedia;
     @Column(name = "postdescription", length = 500)
     private String postDescription;
     @JsonProperty(access = Access.READ_ONLY)
@@ -37,4 +37,8 @@ public class Post {
     @JsonProperty(access = Access.READ_ONLY)
     @Column(name = "createdat")
     private final Timestamp createdAt = Timestamp.from(Instant.now());
+    public Post(String postMedia,String postDescription){
+        this.postMedia = postMedia;
+        this.postDescription=postDescription;
+    }
 }
