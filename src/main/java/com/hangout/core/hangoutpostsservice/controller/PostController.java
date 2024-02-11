@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/posts/post")
+@RequestMapping("/post")
 public class PostController {
     private final PostService postService;
 @Observed(name = "create-post", contextualName = "gateway ===> controller function")
