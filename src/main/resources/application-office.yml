@@ -1,9 +1,0 @@
-spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/posts
-    username: postgres
-    password: password-123
-eureka:
-  instance:
-    hostname: localhost
-    instance-id: ${eureka.instance.hostname}:${spring.application.name}:${server.port}:${spring.application.instance_id:${random.value}}

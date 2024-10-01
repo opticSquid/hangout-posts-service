@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <include resource="org/springframework/boot/logging/logback/base.xml" />
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+    <springProperty scope="context" name="logDir" source="hangout.log.path"/>
+    <springProperty scope="context" name="lokiServer" source="hangout.loki-server.url"/>
     <springProperty scope="context" name="appName" source="spring.application.name" />
-
+    <!--LOKI Appender-->
     <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
         <http>
-            <url>http://localhost:3100/loki/api/v1/push</url>
+            <url>${lokiServer}/loki/api/v1/push</url>
         </http>
         <format>
             <label>
@@ -17,8 +20,27 @@
             <sortByTime>true</sortByTime>
         </format>
     </appender>
-
-    <root level="INFO">
-        <appender-ref ref="LOKI" />
-    </root>
+    <!--File Appender-->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+        </encoder>
+        <file>${logDir}/run.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${logDir}/run-%d{yyyy-MM-dd HH:mm}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>100MB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+    <springProfile name="home">
+        <root level="INFO">
+            <appender-ref ref="LOKI" />
+        </root>
+    </springProfile>
+    <springProfile name="default">
+        <root level="INFO">
+            <appender-ref ref="LOKI" />
+            <appender-ref ref="FILE" />
+        </root>
+    </springProfile>
 </configuration>

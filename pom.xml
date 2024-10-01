@@ -6,17 +6,19 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.2.0</version>
+		<version>3.3.2</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.hangout.core</groupId>
-	<artifactId>hangout-posts-service</artifactId>
-	<version>0.0.2-SNAPSHOT</version>
-	<name>hangout-posts-service</name>
+	<artifactId>hangout-post-service</artifactId>
+	<version>0.0.2</version>
+	<name>hangout-post-service</name>
 	<description>This service contains all the post related operations for the vendors in Hangout project</description>
 	<properties>
 		<java.version>21</java.version>
-		<spring-cloud.version>2023.0.0</spring-cloud.version>
+		<spring-cloud.version>2023.0.3</spring-cloud.version>
+		<loki-appender.version>1.5.1</loki-appender.version>
+		<spring-doc.version>2.6.0</spring-doc.version>
 	</properties>
 	<dependencies>
 		<!--START
@@ -45,7 +47,7 @@
 		<dependency>
 			<groupId>com.github.loki4j</groupId>
 			<artifactId>loki-logback-appender</artifactId>
-			<version>1.4.2</version>
+			<version>${loki-appender.version}</version>
 			<scope>runtime</scope>
 		</dependency>
 		<!--END
@@ -59,7 +61,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
-
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>${spring-doc.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
@@ -75,10 +81,6 @@
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-consul-discovery</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.github.ben-manes.caffeine</groupId>
