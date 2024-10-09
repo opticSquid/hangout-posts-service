@@ -56,9 +56,15 @@ public class PostService {
         Post post = new Post(user.username(), postDescription.isPresent() ? postDescription.get() : "");
         // upload files to shared path and get their file names
         List<UploadedMediaDetails> uploadedMediaFiles = uploadMedias(user, files);
-        // create a list of media files to be added to db
         List<Media> postMedias = uploadedMediaFiles.parallelStream()
-                .map(file -> new Media(file.derivedFilename(), file.contentType(), post)).toList();
+                .map(file -> {
+                    // produce events in kafka for successful file uploads
+                    // this events will be consumed by storage service
+                    kafkaTemplate.send(topic, file.contentType(), file.derivedFilename());
+                    // create a list of media files to be added to db
+                    return new Media(file.derivedFilename(), file.contentType(), post);
+                })
+                .toList();
         // setting the media in post object
         post.setPostMedias(postMedias);
         // save the post in db
@@ -113,8 +119,6 @@ public class PostService {
                 }
                 // add the file details to list
                 details.add(new UploadedMediaDetails(hashedFilename, file.getContentType()));
-                // produce kafka event to let know the storage service to ingest the files
-                kafkaTemplate.send(topic, file.getContentType(), hashedFilename);
             } else {
                 throw new UnsupportedMediaType(file.getOriginalFilename()
                         + " is not supported. Please upload a supported format of multimedia file");

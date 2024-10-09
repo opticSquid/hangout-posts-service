@@ -39,7 +39,7 @@ public class Post {
     @JsonProperty(access = Access.READ_ONLY)
     private final ZonedDateTime createdAt = ZonedDateTime.now(ZoneOffset.UTC);
     @JsonProperty(access = Access.READ_ONLY)
-    private final Boolean publish = false;
+    private final Boolean publish = true;
 
     public Post(String ownerName, String postDescription) {
         this.ownerName = ownerName;
