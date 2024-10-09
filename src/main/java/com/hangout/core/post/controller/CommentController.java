@@ -14,6 +14,7 @@ import com.hangout.core.post.dto.NewCommentRequest;
 import com.hangout.core.post.dto.Reply;
 import com.hangout.core.post.services.CommentService;
 
+import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -22,21 +23,25 @@ import lombok.RequiredArgsConstructor;
 public class CommentController {
     private final CommentService commentService;
 
+    @Observed(name = "create-top-level-comment", contextualName = "controller")
     @PostMapping
     public String createTopLevelComment(@RequestBody NewCommentRequest comment) {
         return commentService.createTopLevelComment(comment);
     }
 
+    @Observed(name = "reply-to-comment", contextualName = "controller")
     @PostMapping("/reply")
     public String createSubComment(@RequestBody Reply reply) {
         return commentService.createSubComments(reply);
     }
 
+    @Observed(name = "get-all-top-level-comments", contextualName = "controller")
     @GetMapping("/all/{postId}")
     public List<CommentDTO> getAllTopLevelComments(@PathVariable String postId) {
         return commentService.fetchTopLevelCommentsForAPost(postId);
     }
 
+    @Observed(name = "get-replies-to-a-comment", contextualName = "controller")
     @GetMapping("/replies/{parentCommentId}")
     public List<CommentDTO> getAllChildCommentsOfAParentComment(@PathVariable String parentCommentId) {
         return commentService.fetchAllChildCommentsForAComment(parentCommentId);

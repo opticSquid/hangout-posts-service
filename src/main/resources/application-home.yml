@@ -10,6 +10,8 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+  kafka:
+    bootstrap-servers: localhost:9092
 
 logging:
   level:
@@ -37,6 +39,10 @@ management:
             requests: true
 
 hangout:
+  auth-service:
+    url: http://localhost:5011/auth/v1/user/validate
+  storage-service:
+    path: /home/soumalya/Development/Hangout/shared-path
   loki-server:
     url: http://localhost:3100
   tempo-server:

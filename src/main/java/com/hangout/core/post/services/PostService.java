@@ -1,58 +1,73 @@
 package com.hangout.core.post.services;
 
-import io.micrometer.observation.annotation.Observed;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.io.File;
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.hangout.core.post.dto.FileUploadRequestDTO;
-import com.hangout.core.post.dto.FileUploadResponseDTO;
-import com.hangout.core.post.dto.PostDTO;
+import com.hangout.core.post.dto.PostCreationResponse;
+import com.hangout.core.post.dto.UploadedMediaDetails;
+import com.hangout.core.post.dto.User;
+import com.hangout.core.post.entities.Media;
 import com.hangout.core.post.entities.Post;
 import com.hangout.core.post.exceptions.FileUploadFailed;
+import com.hangout.core.post.exceptions.UnauthorizedAccessException;
+import com.hangout.core.post.exceptions.UnsupportedMediaType;
 import com.hangout.core.post.repositories.PostRepo;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import io.micrometer.observation.annotation.Observed;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class PostService {
     private final PostRepo postRepo;
-    private final RestClient rc = RestClient.create();
+    private final RestClient restClient;
+    private final HashService hashService;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+    @Value("${hangout.auth-service.url}")
+    private String authServiceURL;
+    @Value("${hangout.storage-service.path}")
+    private String storageServicePath;
+    @Value("${hangout.kafka.topic}")
+    private String topic;
 
-    @Observed(name = "create-post", contextualName = "service")
-    public String create(PostDTO postDto) {
-        String fileNames = uploadFiles(postDto.files());
-        Post newPost = new Post(fileNames, postDto.postDescription());
-        Post savedPost = postRepo.save(newPost);
-        return savedPost.getPostId().toString();
+    @Observed(name = "create-post", contextualName = "create post service")
+    @Transactional
+    public PostCreationResponse create(String authToken, List<MultipartFile> files,
+            Optional<String> postDescription) {
+        // authorize the user. this method may throw exception but this exception is
+        // handled in global exception handler
+        User user = authorizeUser(authToken);
+        // create the post object
+        Post post = new Post(user.username(), postDescription.isPresent() ? postDescription.get() : "");
+        // upload files to shared path and get their file names
+        List<UploadedMediaDetails> uploadedMediaFiles = uploadMedias(user, files);
+        // create a list of media files to be added to db
+        List<Media> postMedias = uploadedMediaFiles.parallelStream()
+                .map(file -> new Media(file.derivedFilename(), file.contentType(), post)).toList();
+        // setting the media in post object
+        post.setPostMedias(postMedias);
+        // save the post in db
+        Post newPost = postRepo.save(post);
+        // return post id
+        return new PostCreationResponse(uploadedMediaFiles.size(), newPost.getPostId().toString());
     }
 
-    @Observed(name = "create-post", contextualName = "create post service function(with DB call) ===> upload request to storage service")
-    public String uploadFiles(MultipartFile files) {
-        try {
-            FileUploadRequestDTO request = new FileUploadRequestDTO(files);
-            ResponseEntity<FileUploadResponseDTO> uploadResponse = rc.post().uri("http://localhost:8080/upload")
-                    .contentType(request.getContentType()).body(request.getBody()).retrieve()
-                    .toEntity(FileUploadResponseDTO.class);
-            if (uploadResponse.getStatusCode().is2xxSuccessful()) {
-                return Objects.requireNonNull(uploadResponse.getBody()).uploadStatus();
-            } else {
-                throw new FileUploadFailed("Storage Engine returned error response");
-            }
-        } catch (IOException e) {
-            throw new FileUploadFailed("could not retrieve file size of the attached file");
-        }
-    }
-
+    @Observed(name = "get-all-posts", contextualName = "service")
     public List<Post> findAll() {
         return postRepo.findAll();
     }
@@ -74,4 +89,55 @@ public class PostService {
     public void increaseHeartCount(UUID postId) {
         postRepo.increaseHeartCount(postId);
     }
+
+    // ? kept public for observalibility
+    @Observed(name = "create-post", contextualName = "upload media service")
+    public List<UploadedMediaDetails> uploadMedias(User user, List<MultipartFile> files) {
+        List<UploadedMediaDetails> details = new LinkedList<>();
+        // lets upload all the files given by the user in the post to storage service.
+        files.parallelStream().forEach(file -> {
+            // check file content
+            if (file.getContentType().startsWith("image/") || file.getContentType().startsWith("video/")) {
+                // create a hash for the file names of each file
+                String hashedFilename = hashService.hash(user);
+                // get the originalFilename split in the '.' position and get the extension name
+                int lastDotIndex = file.getOriginalFilename().lastIndexOf('.');
+                String originalfileExtension = file.getOriginalFilename().substring(lastDotIndex + 1);
+                hashedFilename += "." + originalfileExtension;
+                // save the multipart file to the given destination on disk
+                try {
+                    file.transferTo(new File(storageServicePath + "/" + hashedFilename));
+                } catch (IllegalStateException | IOException e) {
+                    throw new FileUploadFailed("Failed to upload file: " +
+                            file.getOriginalFilename());
+                }
+                // add the file details to list
+                details.add(new UploadedMediaDetails(hashedFilename, file.getContentType()));
+                // produce kafka event to let know the storage service to ingest the files
+                kafkaTemplate.send(topic, file.getContentType(), hashedFilename);
+            } else {
+                throw new UnsupportedMediaType(file.getOriginalFilename()
+                        + " is not supported. Please upload a supported format of multimedia file");
+            }
+
+        });
+        return details;
+    }
+
+    private User authorizeUser(String authHeader) throws UnauthorizedAccessException {
+        ResponseEntity<User> response = restClient
+                .get()
+                .uri(authServiceURL)
+                .header("Authorization", authHeader)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .toEntity(User.class);
+        if (response.getStatusCode().is2xxSuccessful()) {
+            return response.getBody();
+        } else {
+            throw new UnauthorizedAccessException(
+                    "User is not valid or user does not have permission to perform current action");
+        }
+    }
+
 }

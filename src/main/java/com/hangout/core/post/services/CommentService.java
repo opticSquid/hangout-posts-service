@@ -8,12 +8,12 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import com.hangout.core.post.dto.CommentDTO;
-import com.hangout.core.post.dto.FetchCommentProjection;
 import com.hangout.core.post.dto.NewCommentRequest;
 import com.hangout.core.post.dto.Reply;
 import com.hangout.core.post.entities.Comment;
 import com.hangout.core.post.entities.HierarchyKeeper;
 import com.hangout.core.post.entities.Post;
+import com.hangout.core.post.projections.FetchCommentProjection;
 import com.hangout.core.post.repositories.CommentRepo;
 import com.hangout.core.post.repositories.HierarchyKeeperRepo;
 

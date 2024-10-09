@@ -1,10 +1,10 @@
 server:
   port: 5013
   servlet:
-    context-path: /post
+    context-path: /content
 spring:
   application:
-    name: post
+    name: hangout-content-service
   datasource:
     driverClassName: org.postgresql.Driver
     url: jdbc:postgresql://${CLUSTER_URL}/${DB_NAME}
@@ -12,8 +12,8 @@ spring:
     password: ${DB_PASSWORD}
   servlet:
     multipart:
-      max-file-size: 5MB
-      max-request-size: 6MB
+      max-file-size: 5GB
+      max-request-size: 5223MB # aprx 5.1 GB
   jpa:
     properties:
       hibernate:
@@ -24,6 +24,11 @@ spring:
   output:
     ansi:
       enabled: ALWAYS
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVER}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
 # All traces should be sent to latency analysis tool
 management:
@@ -59,6 +64,12 @@ logging:
     level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
 
 hangout:
+  kafka:
+    topic: content
+  auth-service:
+    url: ${AUTH_SERVICE}
+  storage-service:
+    path: ${STORAGE_PATH}
   loki-server:
     url: ${LOKI_SERVER}
   tempo-server:
