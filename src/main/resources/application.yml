@@ -68,8 +68,8 @@ hangout:
     topic: content
   auth-service:
     url: ${AUTH_SERVICE}
-  storage-service:
-    path: ${STORAGE_PATH}
+  media:
+    upload-path: ${STORAGE_PATH}
   loki-server:
     url: ${LOKI_SERVER}
   tempo-server:

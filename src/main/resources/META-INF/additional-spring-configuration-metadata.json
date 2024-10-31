@@ -26,7 +26,7 @@
             "description": "URL of auth service to authorize access tokens"
         },
         {
-            "name": "hangout.storage-service.path",
+            "name": "hangout.media.upload-path",
             "type": "java.lang.String",
             "description": "The shared path in which we will place the uploaded multimedia files for further processing"
         }

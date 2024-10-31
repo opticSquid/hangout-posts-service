@@ -40,7 +40,7 @@ public class PostService {
     private final KafkaTemplate<String, Object> kafkaTemplate;
     @Value("${hangout.auth-service.url}")
     private String authServiceURL;
-    @Value("${hangout.storage-service.path}")
+    @Value("${hangout.media.upload-path}")
     private String storageServicePath;
     @Value("${hangout.kafka.topic}")
     private String topic;
