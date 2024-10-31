@@ -1,0 +1,34 @@
+{
+    "properties": [
+        {
+            "name": "hangout.loki-server.url",
+            "type": "java.lang.String",
+            "description": "URL of Grafana Loki server. It is used to ship logs for observability"
+        },
+        {
+            "name": "hangout.tempo-server.url",
+            "type": "java.lang.String",
+            "description": "URL of Grafana Tempo server. It is used to ship traces for observability"
+        },
+        {
+            "name": "hangout.log.path",
+            "type": "java.lang.String",
+            "description": "Log Directory where ogs will be permanently stored"
+        },
+        {
+            "name": "hangout.kafka.topic",
+            "type": "java.lang.String",
+            "description": "The kafka topic to produce event in, to indicate new multimedia content is available for processing"
+        },
+        {
+            "name": "hangout.auth-service.url",
+            "type": "java.lang.String",
+            "description": "URL of auth service to authorize access tokens"
+        },
+        {
+            "name": "hangout.media.upload-path",
+            "type": "java.lang.String",
+            "description": "The shared path in which we will place the uploaded multimedia files for further processing"
+        }
+    ]
+}

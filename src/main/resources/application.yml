@@ -1,18 +1,19 @@
 server:
-  port: 0
+  port: 5013
   servlet:
-    context-path: /posts
+    context-path: /content
 spring:
   application:
-    name: post
-  profiles:
-    active: home
+    name: hangout-content-service
   datasource:
-    driver-class-name: org.postgresql.Driver
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://${CLUSTER_URL}/${DB_NAME}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   servlet:
     multipart:
-      max-file-size: 5MB
-      max-request-size: 6MB
+      max-file-size: 5GB
+      max-request-size: 5223MB # aprx 5.1 GB
   jpa:
     properties:
       hibernate:
@@ -23,13 +24,55 @@ spring:
   output:
     ansi:
       enabled: ALWAYS
-#eureka:
-#  client:
-#    fetch-registry: true
-#    register-with-eureka: true
-#    service-url:
-#      defaultZone: http://localhost:8761/eureka
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVER}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+# All traces should be sent to latency analysis tool
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  endpoints:
+    web:
+      exposure:
+        include: prometheus, health
+  # For Exemplars to work we need histogram buckets
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http:
+          server:
+            requests: true
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui
+
 logging:
   level:
-    web: info
-    "[com.hangout.core]": info
+    web: error
+    sql: error
+    "[org.springframework.security]": error
+    "[com.hangout.core]": trace
+    # traceID and spanId are predefined MDC keys - we want the logs to include them
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+
+hangout:
+  kafka:
+    topic: content
+  auth-service:
+    url: ${AUTH_SERVICE}
+  media:
+    upload-path: ${STORAGE_PATH}
+  loki-server:
+    url: ${LOKI_SERVER}
+  tempo-server:
+    url: ${TEMPO_SERVER}
+  log:
+    path: ${LOG_DIR}
