@@ -4,7 +4,7 @@ server:
     context-path: /content
 spring:
   application:
-    name: hangout-content-service
+    name: hangout-post-service
   datasource:
     driverClassName: org.postgresql.Driver
     url: jdbc:postgresql://${CLUSTER_URL}/${DB_NAME}
