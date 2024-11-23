@@ -11,8 +11,9 @@ This service serves this functions currently:
 - upload new posts
 - in case the post contains photos and videos upload them to shared path and create event in kafka topic to let the `hangout-storage-service` know that new files are to be processed
 - Integrate with grafana stack directly to correlate observability data with other services.
+- Integrated with Open API 3 api definition specs
 
-## Planned Features
+ ## Planned Features
 
 - Send the observability data to otel collector instead of specific to any service provider
 - Add a `place-name` parameter to the post. This field would contain the profile of the business about which the current post is being done in case the business is registerted with Hangout.
