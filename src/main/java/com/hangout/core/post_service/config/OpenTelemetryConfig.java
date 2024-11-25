@@ -30,8 +30,8 @@ import io.opentelemetry.semconv.ResourceAttributes;
 
 @Configuration
 public class OpenTelemetryConfig {
-        @Value("${hangout.tempo-server.url}")
-        private String tempoUrl;
+        @Value("${hangout.otel-collector.url}")
+        private String collectorUrl;
 
         @Bean
         OpenTelemetry openTelemetry(SdkLoggerProvider sdkLoggerProvider, SdkTracerProvider sdkTracerProvider,
@@ -62,7 +62,7 @@ public class OpenTelemetryConfig {
                 return BatchLogRecordProcessor
                                 .builder(
                                                 OtlpGrpcLogRecordExporter.builder()
-                                                                .setEndpoint(tempoUrl)
+                                                                .setEndpoint(collectorUrl)
                                                                 .build())
                                 .build();
         }
@@ -92,7 +92,7 @@ public class OpenTelemetryConfig {
         @Bean
         SpanExporter otlpGrpcSpanExporter() {
                 return OtlpGrpcSpanExporter.builder()
-                                .setEndpoint(tempoUrl + "/v1/spans")
+                                .setEndpoint(collectorUrl + "/v1/spans")
                                 .addHeader("api-key", "value")
                                 .setTimeout(Duration.ofSeconds(10))
                                 .build();

@@ -2,8 +2,9 @@
 <configuration>
     <include resource="org/springframework/boot/logging/logback/defaults.xml" />
     <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
-    <springProperty scope="context" name="logDir" source="hangout.log.path"/>
-    <!--File Appender-->
+    <springProperty scope="context" name="logDir" source="hangout.log.path" />
+    <!--File
+    Appender-->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <encoder>
             <pattern>${FILE_LOG_PATTERN}</pattern>
@@ -15,11 +16,13 @@
             <totalSizeCap>100MB</totalSizeCap>
         </rollingPolicy>
     </appender>
-    <!--Otel Appender-->
-    <appender name="OPEN_TELEMETRY" class="io.opentelemetry.instrumentation.logback.appender.v1_0.OpenTelemetryAppender">
+    <!--Otel
+    Appender-->
+    <appender name="OPEN_TELEMETRY"
+        class="io.opentelemetry.instrumentation.logback.appender.v1_0.OpenTelemetryAppender">
         <captureExperimentalAttributes>true</captureExperimentalAttributes>
         <captureKeyValuePairAttributes>true</captureKeyValuePairAttributes>
-     </appender>
+    </appender>
     <springProfile name="home">
         <root level="INFO">
             <appender-ref ref="CONSOLE" />
@@ -30,6 +33,7 @@
         <root level="INFO">
             <appender-ref ref="OPEN_TELEMETRY" />
             <appender-ref ref="FILE" />
+            <appender-ref ref="CONSOLE" />
         </root>
     </springProfile>
 </configuration>
