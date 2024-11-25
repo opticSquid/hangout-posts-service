@@ -1,5 +1,7 @@
 package com.hangout.core.post_service.config;
 
+import java.time.Duration;
+
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -10,6 +12,7 @@ import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.context.propagation.ContextPropagators;
 import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporter;
+import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.instrumentation.logback.appender.v1_0.OpenTelemetryAppender;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.logs.LogRecordProcessor;
@@ -18,6 +21,11 @@ import io.opentelemetry.sdk.logs.SdkLoggerProviderBuilder;
 import io.opentelemetry.sdk.logs.export.BatchLogRecordProcessor;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
+import io.opentelemetry.sdk.trace.SpanLimits;
+import io.opentelemetry.sdk.trace.SpanProcessor;
+import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
+import io.opentelemetry.sdk.trace.export.SpanExporter;
+import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.semconv.ResourceAttributes;
 
 @Configuration
@@ -56,6 +64,64 @@ public class OpenTelemetryConfig {
                                                 OtlpGrpcLogRecordExporter.builder()
                                                                 .setEndpoint(tempoUrl)
                                                                 .build())
+                                .build();
+        }
+
+        @Bean
+        SdkTracerProvider sdkTracerProvider(Resource resource, SpanProcessor batchSpanProcessor,
+                        SpanExporter otlpGrpcSpanExporter, Sampler parentBasedSampler, Sampler traceIdRatioBased,
+                        SpanLimits spanLimits) {
+                return SdkTracerProvider.builder()
+                                .setResource(resource)
+                                .addSpanProcessor(
+                                                batchSpanProcessor(otlpGrpcSpanExporter))
+                                .setSampler(parentBasedSampler(traceIdRatioBased))
+                                .setSpanLimits(spanLimits)
+                                .build();
+        }
+
+        @Bean
+        SpanProcessor batchSpanProcessor(SpanExporter spanExporter) {
+                return BatchSpanProcessor.builder(spanExporter)
+                                .setMaxQueueSize(2048)
+                                .setExporterTimeout(Duration.ofSeconds(30))
+                                .setScheduleDelay(Duration.ofSeconds(5))
+                                .build();
+        }
+
+        @Bean
+        SpanExporter otlpGrpcSpanExporter() {
+                return OtlpGrpcSpanExporter.builder()
+                                .setEndpoint(tempoUrl + "/v1/spans")
+                                .addHeader("api-key", "value")
+                                .setTimeout(Duration.ofSeconds(10))
+                                .build();
+        }
+
+        @Bean
+        Sampler parentBasedSampler(Sampler root) {
+                return Sampler.parentBasedBuilder(root)
+                                .setLocalParentNotSampled(Sampler.alwaysOff())
+                                .setLocalParentSampled(Sampler.alwaysOn())
+                                .setRemoteParentNotSampled(Sampler.alwaysOff())
+                                .setRemoteParentSampled(Sampler.alwaysOn())
+                                .build();
+        }
+
+        @Bean
+        Sampler traceIdRatioBased() {
+                return Sampler.traceIdRatioBased(0.25);
+        }
+
+        @Bean
+        SpanLimits spanLimits() {
+                return SpanLimits.builder()
+                                .setMaxNumberOfAttributes(128)
+                                .setMaxAttributeValueLength(1024)
+                                .setMaxNumberOfLinks(128)
+                                .setMaxNumberOfAttributesPerLink(128)
+                                .setMaxNumberOfEvents(128)
+                                .setMaxNumberOfAttributesPerEvent(128)
                                 .build();
         }
 }
