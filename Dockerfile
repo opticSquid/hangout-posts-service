@@ -18,4 +18,4 @@ COPY src ./src
 RUN mvn package -DskipTests=true
 
 # Set the command to run the Spring Boot application
-CMD ["java", "-jar", "target/hangout-posts-service-0.0.2.jar"]
+CMD ["java", "-jar", "target/hangout-posts-service-0.1.0.jar"]
