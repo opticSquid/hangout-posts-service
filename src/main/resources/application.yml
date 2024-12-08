@@ -7,7 +7,7 @@ spring:
     name: hangout-post-service
   datasource:
     driverClassName: org.postgresql.Driver
-    url: jdbc:postgresql://${CLUSTER_URL}/${DB_NAME}
+    url: jdbc:postgresql://${DB_URL}/${DB_NAME}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
   servlet:
@@ -39,6 +39,13 @@ management:
     web:
       exposure:
         include: prometheus, health
+  otlp:
+    # configures the endpoint to send OTLP metrics. (Does not support GRPC)
+    metrics:
+      export:
+        url: ${OTEL_COLLECTOR}/v1/metrics
+    tracing:
+      compression: gzip
   # For Exemplars to work we need histogram buckets
   metrics:
     distribution:

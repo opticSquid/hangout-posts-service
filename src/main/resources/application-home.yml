@@ -23,6 +23,10 @@ logging:
 
 # All traces should be sent to latency analysis tool
 management:
+  otlp:
+    metrics:
+      export:
+        url: http://localhost:4318/v1/metrics
   tracing:
     sampling:
       probability: 1.0
@@ -44,6 +48,6 @@ hangout:
   media:
     upload-path: /media/soumalya/793f3da3-8908-48a8-a4ce-a638275951fa/hangout-upload-path
   otel-collector:
-    url: http://localhost:4317
+    url: http://localhost:4318
   log:
-    path: /home/soumalya/Development/Hangout/core-services/hangout-posts-service/logs
+    path: /home/soumalya/Development/Hangout/core-services/hangout-post-api/logs
