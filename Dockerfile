@@ -15,7 +15,7 @@ COPY src ./src
 # Build the project
 # skipping tests because tests depend on test container and it is not possible to install docker in a docker image
 # other than that nin github test is done is another workflow file which will tell is wheather can we merge the pr or not
-RUN mvn package -DskipTests=true
+RUN mvn clean package -DskipTests=true
 
 # Set the command to run the Spring Boot application
-CMD ["java", "-jar", "target/hangout-post-api-1.0.3.jar"]
+CMD ["java", "-jar", "target/hangout-post-api-1.0.4.jar"]
