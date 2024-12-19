@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.hangout.core.post_api.dto.PostCreationResponse;
 import com.hangout.core.post_api.dto.UploadedMediaDetails;
 import com.hangout.core.post_api.dto.User;
+import com.hangout.core.post_api.dto.UserValidationRequest;
 import com.hangout.core.post_api.entities.Media;
 import com.hangout.core.post_api.entities.Post;
 import com.hangout.core.post_api.exceptions.FileUploadFailed;
@@ -130,9 +131,9 @@ public class PostService {
 
     private User authorizeUser(String authHeader) throws UnauthorizedAccessException {
         ResponseEntity<User> response = restClient
-                .get()
-                .uri(authServiceURL)
-                .header("Authorization", authHeader)
+                .post()
+                .uri(authServiceURL + "/auth/v1/internal/validate")
+                .body(new UserValidationRequest(authHeader))
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .toEntity(User.class);
